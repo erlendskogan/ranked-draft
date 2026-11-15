@@ -371,8 +371,8 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem("draft2:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem("draft2:" + k, JSON.stringify(v)); } catch {} },
 };
-const fresh = () => ({ phase: "home", mode: null, map: null, side: null, bans: [], picks: [], q: "", showAll: false, mine: true });
-const mineOn = () => !!R && S.mine !== false;
+const fresh = () => ({ phase: "home", mode: null, map: null, side: null, bans: [], picks: [], q: "", showAll: false, mine: false });
+const mineOn = () => !!R && S.mine === true;
 let S;
 
 const allies = () => S.picks.filter(p => p.t === "me").map(p => p.n);
@@ -469,7 +469,7 @@ function render() {
   if (P === "home") {
     app.innerHTML = `<section class="card hero">${heroFan()}
       <h2>Klar for ranked?</h2>
-      <p class="sub">Velg mode og map, og legg inn picks etter hvert som de skjer. På deres tur får du de beste forslagene${R ? " blant dine egne brawlers" : ""}.</p>
+      <p class="sub">Velg mode og map, og legg inn picks etter hvert som de skjer. På deres tur får du de beste forslagene${R ? ", og du kan slå på «Bare mine brawlers» for å se bare dine egne" : ""}.</p>
       <button class="btn big" data-act="start">Start match</button></section>`;
   } else if (P === "mode") {
     app.innerHTML = `<section class="card">${stepsBar()}<h2>Hvilken game mode?</h2>
@@ -600,6 +600,7 @@ function bindPicks(root) {
 function start(data) {
   S = (data && data.state) || store.get("state", null) || fresh();
   if (S.map && !D.maps.includes(S.map)) S = fresh();
+  S.mine = false;   // «Bare mine brawlers» starter alltid av når siden åpnes
   window.claude?.hot?.snapshot?.(() => ({ state: S }));
   const info = D.info, d = ts => new Date(ts * 1000).toLocaleDateString("nb-NO", { day: "numeric", month: "short" });
   document.getElementById("meta").textContent = `${nf0.format(info.n_battles)} kamper · Legendary III+ · ${d(info.first)}–${d(info.last)}`;
