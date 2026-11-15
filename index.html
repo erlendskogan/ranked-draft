@@ -68,6 +68,7 @@ h2 { font-size: 30px; line-height: 1.08; margin: 0; text-wrap: balance; }
 .btn.enemy { --c: var(--enemy); --lo: var(--enemy-lo); }
 .btn.ghost { --c: #2a4cb4; --lo: #183482; font-size: 16px; padding: 8px 14px; }
 .btn.ghost.toggle[aria-pressed="true"] { --c: #19a65a; --lo: #0b6a37; }
+.head-r { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .bar-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
 
 /* Steg */
@@ -235,7 +236,8 @@ td .mini.me { box-shadow: 0 0 0 2px var(--ally); } td .mini.en { box-shadow: 0 0
 <div class="wrap">
   <header>
     <h1>Ranked <span>Draft</span></h1>
-    <span class="chip" id="meta"></span>
+    <div class="head-r"><span class="chip" id="meta"></span>
+    <button class="btn ghost" id="newgame" hidden>↺ Ny match</button></div>
   </header>
   <main id="app" aria-live="polite"></main>
   <p class="foot" id="foot"></p>
@@ -383,6 +385,7 @@ const mapsFor = mode => D.maps.filter(m => D.map_mode[m] === mode)
   .sort((a, b) => sum(D.map_games[b]) - sum(D.map_games[a]));
 const sum = a => a.reduce((s, v) => s + v, 0);
 
+const newGame = () => set({ ...fresh(), phase: "mode", mode: S.mode, map: S.map });
 function set(patch) { Object.assign(S, patch); store.set("state", S); render(); window.scrollTo({ top: 0 }); }
 function choose(name) {
   if (used().has(name)) return;
@@ -466,6 +469,7 @@ function heroFan() {
 function render() {
   const app = document.getElementById("app");
   const P = S.phase;
+  document.getElementById("newgame").hidden = P === "home";
   if (P === "home") {
     app.innerHTML = `<section class="card hero">${heroFan()}
       <h2>Klar for ranked?</h2>
@@ -564,7 +568,7 @@ function bind() {
   const app = document.getElementById("app");
   app.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => {
     const a = b.dataset.act;
-    if (a === "start") set({ ...fresh(), phase: "mode", mode: S.mode, map: S.map });
+    if (a === "start") newGame();
     if (a === "undo") undo();
     if (a === "tobans") set({ phase: "draft", q: "" });
     if (a === "more") set({ showAll: !S.showAll });
@@ -601,6 +605,7 @@ function start(data) {
   S = (data && data.state) || store.get("state", null) || fresh();
   if (S.map && !D.maps.includes(S.map)) S = fresh();
   S.mine = false;   // «Bare mine brawlers» starter alltid av når siden åpnes
+  document.getElementById("newgame").onclick = newGame;
   window.claude?.hot?.snapshot?.(() => ({ state: S }));
   const info = D.info, d = ts => new Date(ts * 1000).toLocaleDateString("nb-NO", { day: "numeric", month: "short" });
   document.getElementById("meta").textContent = `${nf0.format(info.n_battles)} kamper · Legendary III+ · ${d(info.first)}–${d(info.last)}`;
