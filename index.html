@@ -556,8 +556,7 @@ function renderDone(app) {
       <div class="tbl"><table><thead><tr><th>Brawler</th><th class="num">Styrke på map</th><th class="num">Kamper</th><th class="num">WR</th></tr></thead>
       <tbody>${A.map(i => line(i, "me")).join("")}${Bt.map(i => line(i, "en")).join("")}</tbody></table></div>
       <div class="bar-actions"><button class="btn ghost" data-act="undo">← Angre siste pick</button>
-      <button class="btn" data-act="again">Ny match på ${esc(S.map)}</button></div>
-      <div class="bar-actions"><button class="btn ghost" data-act="start">Ny match, annet map</button></div>
+      <button class="btn" data-act="start">Ny match</button></div>
     </section>`;
 }
 
@@ -570,7 +569,6 @@ function bind() {
     if (a === "tobans") set({ phase: "draft", q: "" });
     if (a === "more") set({ showAll: !S.showAll });
     if (a === "mine") set({ mine: !mineOn() });
-    if (a === "again") set({ ...fresh(), phase: "first", mode: S.mode, map: S.map });
   }));
   app.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () =>
     set({ mode: b.dataset.mode, map: S.mode === b.dataset.mode ? S.map : null, phase: "map" })));
